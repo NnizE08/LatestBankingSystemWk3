@@ -1,110 +1,72 @@
 package com.banking;
 
-import com.banking.model.Account;
-import com.banking.model.AccountType;
 import com.banking.service.AccountService;
-
+import com.banking.model.AccountType;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
+        // Create an instance of AccountService
+        AccountService accountService = new AccountService();
+
         try {
-            BankingSystem bank = BankingSystem.getInstance();
+            // Create test accounts (same as before)
+            accountService.createAccount(AccountType.SAVINGS, "SAV001", new BigDecimal("5000.00"));
+            accountService.createAccount(AccountType.CHECKING, "CHK001", new BigDecimal("1000.00"));
+            accountService.createAccount(AccountType.SAVINGS, "SAV002", new BigDecimal("500.00"));
+            accountService.createAccount(AccountType.SAVINGS, "SAV003", new BigDecimal("5500.00"));
 
-            // 1. Create test accounts
-            System.out.println("Creating test accounts...");
-            bank.createAccount(AccountType.SAVINGS, "SAV001",
-                    new BigDecimal("5000.00"));  // Rich account
-            bank.createAccount(AccountType.CHECKING, "CHK001",
-                    new BigDecimal("1000.00"));  // Active account
-            bank.createAccount(AccountType.SAVINGS, "SAV002",
-                    new BigDecimal("500.00"));   // Small account
+            // Show Account Summary
+            System.out.println("ACCOUNT SUMMARY REPORT");
+            System.out.println("Generated: " + getCurrentTime());
+            System.out.println("-------------------------");
+            Map<String, Object> accountSummary = accountService.getAccountSummary();
+            System.out.println("Total Accounts: " + accountSummary.get("totalAccounts"));
+            System.out.println("Total Balance: $" + accountSummary.get("totalBalance"));
+            System.out.println();
+            System.out.println("This shows our total bank holdings");
+            System.out.println();
 
-            // 2. Do test transactions
-            System.out.println("\nPerforming test transactions...");
-            bank.deposit("CHK001", new BigDecimal("2000.00"));
-            bank.withdraw("SAV002", new BigDecimal("100.00"));
-            bank.transfer("SAV001", "CHK001", new BigDecimal("1000.00"));
+            // Show Daily Activity
+            System.out.println("TODAY'S TRANSACTIONS");
+            System.out.println("Date: " + getCurrentDate());
+            System.out.println("-------------------------");
+            Map<String, Object> dailyTransactions = accountService.getDailyTransactions();
+            System.out.println("Money Deposited: $" + dailyTransactions.get("totalDeposits"));
+            System.out.println("Money Withdrawn: $" + dailyTransactions.get("totalWithdrawals"));
+            System.out.println("Total Change: $" + dailyTransactions.get("totalChange"));
+            System.out.println();
+            System.out.println("This tracks today's money movement");
+            System.out.println();
 
-            // 3. Show reports
-            System.out.println("\n=== Account Summary ===");
-            System.out.println(bank.getAccountSummaryReport());
-
-            System.out.println("\n=== Daily Transactions ===");
-            System.out.println(bank.getDailyTransactionReport());
-
-            System.out.println("\n=== Account Activity ===");
-            System.out.println(bank.getAccountActivityReport());
+            // Show Account Activity
+            System.out.println("TOP ACCOUNTS REPORT");
+            System.out.println("Generated: " + getCurrentTime());
+            System.out.println("-------------------------");
+            Map<String, Object> accountActivity = accountService.getAccountActivity();
+            System.out.println("Most Active: " + accountActivity.get("mostActiveAccount"));
+            System.out.println("→ Number of Transactions: " + accountActivity.get("transactionCount"));
+            System.out.println("Highest Balance: " + accountActivity.get("highestBalanceAccount"));
+            System.out.println("→ Current Balance: $" + accountActivity.get("highestBalance"));
+            System.out.println();
+            System.out.println("This shows our important accounts");
 
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error generating reports: " + e.getMessage());
         }
     }
+
+    // Helper function to format the current date and time
+    private static String getCurrentTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(new Date());
+    }
+
+    private static String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new Date());
+    }
 }
-
-
-//        try {
-//            // Start H2 web server  (http://localhost:8082)
-//            org.h2.tools.Server.createWebServer("-web").start();
-//
-//            BankingSystem bank = BankingSystem.getInstance();
-//
-//            // Create accounts
-//            System.out.println("Creating accounts...");
-//            Account savings = bank.createAccount(
-//                AccountType.SAVINGS,
-//                "SAV001",
-//                new BigDecimal("1000.00")
-//            );
-//            System.out.println("Created savings account: " + savings);
-//
-//            Account checking = bank.createAccount(
-//                AccountType.CHECKING,
-//                "CHK001",
-//                new BigDecimal("500.00")
-//            );
-//            System.out.println("Created checking account: " + checking);
-//
-//            // Perform transactions
-//            System.out.println("\nPerforming transactions...");
-//
-//            // Deposit to savings
-//            bank.deposit("SAV001", new BigDecimal("500.00"));
-//            System.out.println("Deposited $500 to savings");
-//            System.out.println("Savings balance: $" + bank.getBalance("SAV001"));
-//
-//            // Transfer from savings to checking
-//            bank.transfer("SAV001", "CHK001", new BigDecimal("300.00"));
-//            System.out.println("Transferred $300 from savings to checking");
-//            System.out.println("Savings balance: $" + bank.getBalance("SAV001"));
-//            System.out.println("Checking balance: $" + bank.getBalance("CHK001"));
-//
-//            // View transaction history
-//            System.out.println("\nTransaction History for SAV001:");
-//            for (String transaction : bank.getTransactionHistory("SAV001")) {
-//                System.out.println(transaction);
-//            }
-//
-//            System.out.println("\nTransaction History for CHK001:");
-//            for (String transaction : bank.getTransactionHistory("CHK001")) {
-//                System.out.println(transaction);
-//            }
-//
-//            // View all transactions
-//            System.out.println("\nAll Transactions:");
-//            for (String transaction : bank.getAllTransactions()) {
-//                System.out.println(transaction);
-//            }
-//
-//        } catch (Exception e) {
-//            System.err.println("Error: " + e.getMessage());
-//            System.err.println("Stack trace:");
-//            System.err.println(e.toString());
-//            for (StackTraceElement element : e.getStackTrace()) {
-//                System.err.println("\tat " + element);
-//            }
-//
-//        }
-//
-//    }
-//}
